@@ -1,0 +1,38 @@
+:root {
+  --app-topManu-bg: rgb(127, 170, 251);
+  --app-export-bg: rgb(177, 177, 177);
+}
+
+.app {
+  display: grid;
+  grid-template-rows: 60px auto 60px;
+  grid-template-columns: auto 300px;
+  grid-template-areas:
+    "topManu topManu"
+    "cropArea option"
+    "export export";
+}
+
+.app__topManu {
+  grid-area: topManu;
+  background-color: var(--app-topManu-bg);
+  font-size: 30px;
+  font-weight: bold;
+
+  display: flex;
+  align-items: center;
+  padding-left: 10px;
+}
+
+.app__cropArea {
+  grid-area: cropArea;
+}
+
+.app__option {
+  grid-area: option;
+}
+
+.app__export {
+  grid-area: export;
+  background-color: var(--app-export-bg);
+}

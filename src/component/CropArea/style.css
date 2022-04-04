@@ -1,0 +1,6 @@
+.cropArea__container {
+  width: 100%;
+  height: calc(100vh - 120px);
+
+  background-color: aqua;
+}
