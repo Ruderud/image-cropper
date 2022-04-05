@@ -9,7 +9,7 @@
   grid-template-columns: auto 300px;
   grid-template-areas:
     "topManu topManu"
-    "cropArea option"
+    "cropArea options"
     "export export";
 }
 
@@ -28,8 +28,8 @@
   grid-area: cropArea;
 }
 
-.app__option {
-  grid-area: option;
+.app__options {
+  grid-area: options;
 }
 
 .app__export {

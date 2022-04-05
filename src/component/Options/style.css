@@ -1,0 +1,9 @@
+.options__container {
+  height: calc(100vh - 120px);
+  background-color: aqua;
+}
+
+.imageUpload {
+  /* display: none; */
+  -webkit-appearance: none;
+}

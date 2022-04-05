@@ -1,6 +1,27 @@
 .cropArea__container {
-  width: 100%;
-  height: calc(100vh - 120px);
+  width: calc(100vh);
+  height: calc(100vh - 120px - 40px);
 
-  background-color: aqua;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  position: relative;
+
+  padding: 20px;
+}
+
+.cropArea__rawImageLayer {
+  display: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(50%, 0%);
+  border: 1px solid black;
+}
+
+.cropArea__cropAreaLayer {
+  display: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, 0%);
 }
