@@ -1,17 +1,27 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ImageType } from "../../App";
 import "./style.css";
 
 interface CropAreaProps {
-  image: ImageType | undefined;
+  image?: ImageType;
 }
 
-enum IMAGE_LAYER_SIZE {
+type Layer = {
+  width: number;
+  height: number;
+};
+
+enum DEFAULT_LAYER_SIZE {
   WIDTH = 500,
   HEIGHT = 500,
 }
 
 export default function CropArea({ image }: CropAreaProps) {
+  const [layerSize, setLayerSize] = useState<Layer>({
+    width: DEFAULT_LAYER_SIZE.WIDTH,
+    height: DEFAULT_LAYER_SIZE.HEIGHT,
+  });
+
   const rawImageLayer = useRef<HTMLCanvasElement>(null);
   const cropAreaLayer = useRef<HTMLCanvasElement>(null);
 
@@ -20,19 +30,27 @@ export default function CropArea({ image }: CropAreaProps) {
     if (image === undefined) return;
 
     const canvas = rawImageLayer.current;
-    const canvasCtx = canvas?.getContext("2d");
-    canvasCtx?.clearRect(0, 0, IMAGE_LAYER_SIZE.WIDTH, IMAGE_LAYER_SIZE.HEIGHT);
+    if (!canvas) return;
+    const canvasCtx = canvas.getContext("2d");
+    if (!canvasCtx) return;
+
+    canvasCtx.clearRect(
+      0,
+      0,
+      DEFAULT_LAYER_SIZE.WIDTH,
+      DEFAULT_LAYER_SIZE.HEIGHT
+    );
+
     const img = new Image();
     img.src = image?.url;
     img.onload = () => {
-      canvasCtx?.drawImage(
-        img,
-        0,
-        0,
-        IMAGE_LAYER_SIZE.WIDTH,
-        IMAGE_LAYER_SIZE.HEIGHT
-      );
+      drawResizedImage({
+        image: img,
+        canvasCtx,
+        setLayerSize,
+      });
     };
+    console.log(layerSize);
   };
 
   useEffect(drawRawImageLayer, [image]);
@@ -42,14 +60,14 @@ export default function CropArea({ image }: CropAreaProps) {
       <canvas
         ref={rawImageLayer}
         className="cropArea__rawImageLayer"
-        width={IMAGE_LAYER_SIZE.WIDTH}
-        height={IMAGE_LAYER_SIZE.HEIGHT}
+        width={layerSize.width}
+        height={layerSize.height}
       />
       <canvas
         ref={cropAreaLayer}
         className="cropArea__cropAreaLayer"
-        width={IMAGE_LAYER_SIZE.WIDTH}
-        height={IMAGE_LAYER_SIZE.HEIGHT}
+        width={layerSize.width}
+        height={layerSize.height}
         // onMouseDown={handleCropAreaLayerMouseDown}
         onMouseMove={(evt) => {
           // debounceOnMouseHandler(evt);
@@ -61,3 +79,65 @@ export default function CropArea({ image }: CropAreaProps) {
     </div>
   );
 }
+
+interface DrawResizedImageParams {
+  image: HTMLImageElement;
+  canvasCtx: CanvasRenderingContext2D;
+  setLayerSize: React.Dispatch<React.SetStateAction<Layer>>;
+}
+
+const drawResizedImage = ({
+  image,
+  canvasCtx,
+  setLayerSize,
+}: DrawResizedImageParams): void => {
+  if (
+    image.width <= DEFAULT_LAYER_SIZE.WIDTH &&
+    image.height <= DEFAULT_LAYER_SIZE.HEIGHT
+  ) {
+    setLayerSize({ width: image.width, height: image.height });
+    canvasCtx.drawImage(image, 0, 0, image.width, image.height);
+    return;
+  }
+
+  const ratio = Math.floor(image.height / image.width);
+
+  if (image.width > image.height) {
+    setLayerSize({
+      width: DEFAULT_LAYER_SIZE.WIDTH,
+      height: DEFAULT_LAYER_SIZE.HEIGHT * ratio,
+    });
+    canvasCtx.drawImage(
+      image,
+      0,
+      0,
+      DEFAULT_LAYER_SIZE.WIDTH,
+      DEFAULT_LAYER_SIZE.HEIGHT * ratio
+    );
+    return;
+  }
+
+  if (image.width <= image.height) {
+    setLayerSize({
+      width: DEFAULT_LAYER_SIZE.WIDTH / ratio,
+      height: DEFAULT_LAYER_SIZE.HEIGHT,
+    });
+    canvasCtx.drawImage(
+      image,
+      0,
+      0,
+      DEFAULT_LAYER_SIZE.WIDTH / ratio,
+      DEFAULT_LAYER_SIZE.HEIGHT
+    );
+    return;
+  }
+
+  console.log("default");
+  canvasCtx.drawImage(
+    image,
+    0,
+    0,
+    DEFAULT_LAYER_SIZE.WIDTH,
+    DEFAULT_LAYER_SIZE.HEIGHT
+  );
+};
