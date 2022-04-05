@@ -2,11 +2,11 @@
 
 this is Simple image cropper (use HTML5 canvas)
 
-site : (not yet distributed)
+site : https://image-cropper.pages.dev/
 
-start: 2022-04-05
+develop : 2022-04-05 ~
 
-distribution: -
+distribution : 2022-04-05 ~
 
 ## Function
 
