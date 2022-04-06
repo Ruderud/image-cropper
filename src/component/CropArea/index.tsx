@@ -1,33 +1,17 @@
 import { useEffect, useRef, useState } from "react";
-import { ImageType } from "../../App";
 import "./style.css";
+import { ImageType } from "../../App";
+import { CropAreaParams, Layer, Mode, MouseHold, MousePosition } from "./types";
+import { drawResizedImageLayer } from "./drawResizedImageLayer";
+import { drawCropAreaBox } from "./drawCropAreaBox";
+import { checkMouseCoordinate, mousePositionInCropArea } from "./handleCursor";
 
-interface CropAreaProps {
-  image?: ImageType;
-}
-
-interface CropArea {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  innerClickX: number;
-  innerClickY: number;
-}
-
-type Layer = {
-  width: number;
-  height: number;
-};
-
-type Mode = "NONE" | "CROP";
-
-enum DEFAULT_LAYER_SIZE {
+export enum DEFAULT_LAYER_SIZE {
   WIDTH = 500,
   HEIGHT = 500,
 }
 
-const DISABLED_CROP_AREA: CropArea = {
+const DISABLED_CROP_AREA: CropAreaParams = {
   x: -100,
   y: -100,
   width: 0,
@@ -36,7 +20,7 @@ const DISABLED_CROP_AREA: CropArea = {
   innerClickY: 0,
 };
 
-const INITIAL_CROP_AREA: CropArea = {
+const INITIAL_CROP_AREA: CropAreaParams = {
   x: 50,
   y: 50,
   width: 100,
@@ -44,14 +28,19 @@ const INITIAL_CROP_AREA: CropArea = {
   innerClickX: 0,
   innerClickY: 0,
 };
+interface CropAreaProps {
+  image?: ImageType;
+}
 
 export default function CropArea({ image }: CropAreaProps) {
   const [layerSize, setLayerSize] = useState<Layer>({
     width: DEFAULT_LAYER_SIZE.WIDTH,
     height: DEFAULT_LAYER_SIZE.HEIGHT,
   });
-  const [cropArea, setCropArea] = useState<CropArea>(DISABLED_CROP_AREA);
+  const [cropArea, setCropArea] = useState<CropAreaParams>(DISABLED_CROP_AREA);
   const [mode, setMode] = useState<Mode>("NONE");
+  const [isMouseHold, setIsMouseHold] = useState<MouseHold>(false);
+  const [mousePosition, setMousePosition] = useState<MousePosition>(false);
 
   const rawImageLayer = useRef<HTMLCanvasElement>(null);
   const cropAreaLayer = useRef<HTMLCanvasElement>(null);
@@ -74,7 +63,7 @@ export default function CropArea({ image }: CropAreaProps) {
     const img = new Image();
     img.src = image?.url;
     img.onload = () => {
-      drawResizedImage({
+      drawResizedImageLayer({
         image: img,
         canvasCtx,
         setLayerSize,
@@ -111,8 +100,129 @@ export default function CropArea({ image }: CropAreaProps) {
     }
   };
 
+  const handleCropAreaLayerMouseDown = (
+    evt: React.MouseEvent<HTMLCanvasElement, MouseEvent>
+  ) => {
+    if (mode === "NONE") return;
+
+    const canvasPosition =
+      cropAreaLayer.current?.getBoundingClientRect() ?? new DOMRect(0, 0, 0, 0);
+
+    const HOLD_POSITION = checkMouseCoordinate(cropArea, {
+      x: evt.clientX - canvasPosition.x,
+      y: evt.clientY - canvasPosition.y,
+    });
+
+    switch (HOLD_POSITION) {
+      case "INNER_HOLD":
+        console.log("이동");
+        setIsMouseHold("INNER_HOLD");
+        setCropArea({
+          ...cropArea,
+          innerClickX: evt.clientX - canvasPosition.x - cropArea.x,
+          innerClickY: evt.clientY - canvasPosition.y - cropArea.y,
+        });
+        break;
+
+      case "OUTER_HOLD":
+        setIsMouseHold("OUTER_HOLD");
+        break;
+
+      default:
+        break;
+    }
+  };
+
+  const handleCropAreaLayerMouseMove = (
+    evt: React.MouseEvent<HTMLCanvasElement, MouseEvent>
+  ) => {
+    const canvasPosition =
+      cropAreaLayer.current?.getBoundingClientRect() ?? new DOMRect(0, 0, 0, 0);
+    const MOUSE_POSITION = mousePositionInCropArea(cropArea, {
+      x: evt.clientX - canvasPosition.x,
+      y: evt.clientY - canvasPosition.y,
+    });
+
+    setMousePosition(MOUSE_POSITION);
+
+    if (mode === "NONE") return;
+    if (!isMouseHold) return;
+
+    if (isMouseHold === "INNER_HOLD" && mousePosition === "INNER") {
+      setCropArea({
+        ...cropArea,
+        x: evt.clientX - canvasPosition.x - cropArea.innerClickX,
+        y: evt.clientY - canvasPosition.y - cropArea.innerClickY,
+      });
+      return;
+    }
+
+    if (
+      isMouseHold === "OUTER_HOLD" &&
+      mousePosition &&
+      mousePosition !== "INNER"
+    ) {
+      console.log("크기조절움직임");
+      setCropArea({
+        ...cropArea,
+        width: evt.clientX - canvasPosition.x - cropArea.x,
+        height: evt.clientY - canvasPosition.y - cropArea.y,
+      });
+    }
+  };
+
+  const handleCropAreaLayerMouseUp = (
+    evt: React.MouseEvent<HTMLCanvasElement, MouseEvent>
+  ) => {
+    if (mode === "NONE") return;
+    if (!isMouseHold) return;
+
+    setIsMouseHold(false);
+  };
+
+  const handleCursorStyle = () => {
+    const bodyTag = document.body;
+
+    switch (mousePosition) {
+      case !mousePosition:
+        bodyTag.style.cursor = "default";
+        break;
+      case "NW_OUTER":
+        bodyTag.style.cursor = "nwse-resize";
+        break;
+      case "N_OUTER":
+        bodyTag.style.cursor = "ns-resize";
+        break;
+      case "NE_OUTER":
+        bodyTag.style.cursor = "nesw-resize";
+        break;
+      case "W_OUTER":
+        bodyTag.style.cursor = "ew-resize";
+        break;
+      case "INNER":
+        bodyTag.style.cursor = "move";
+        break;
+      case "E_OUTER":
+        bodyTag.style.cursor = "ew-resize";
+        break;
+      case "SW_OUTER":
+        bodyTag.style.cursor = "nesw-resize";
+        break;
+      case "S_OUTER":
+        bodyTag.style.cursor = "ns-resize";
+        break;
+      case "SE_OUTER":
+        bodyTag.style.cursor = "nwse-resize";
+        break;
+      default:
+        bodyTag.style.cursor = "default";
+        break;
+    }
+  };
+
   useEffect(drawRawImageLayer, [image]);
   useEffect(drawCropAreaLayer, [layerSize, cropArea, mode]);
+  useEffect(handleCursorStyle, [mousePosition]);
 
   return (
     <div className="cropArea__container">
@@ -127,141 +237,14 @@ export default function CropArea({ image }: CropAreaProps) {
         className="cropArea__cropAreaLayer"
         width={layerSize.width}
         height={layerSize.height}
-        // onMouseDown={handleCropAreaLayerMouseDown}
+        onMouseDown={handleCropAreaLayerMouseDown}
         onMouseMove={(evt) => {
           // debounceOnMouseHandler(evt);
-          // handleCropAreaLayerMouseMove(evt);
+          handleCropAreaLayerMouseMove(evt);
         }}
         // onMouseOut={handleCropAreaLayerMouseOut}
-        // onMouseUp={handleCropAreaLayerMouseUp}
+        onMouseUp={handleCropAreaLayerMouseUp}
       />
     </div>
   );
 }
-
-interface DrawResizedImageParams {
-  image: HTMLImageElement;
-  canvasCtx: CanvasRenderingContext2D;
-  setLayerSize: React.Dispatch<React.SetStateAction<Layer>>;
-}
-
-const drawResizedImage = ({
-  image,
-  canvasCtx,
-  setLayerSize,
-}: DrawResizedImageParams): void => {
-  if (
-    image.width <= DEFAULT_LAYER_SIZE.WIDTH &&
-    image.height <= DEFAULT_LAYER_SIZE.HEIGHT
-  ) {
-    setLayerSize({ width: image.width, height: image.height });
-    canvasCtx.drawImage(image, 0, 0, image.width, image.height);
-    return;
-  }
-
-  const ratio = image.height / image.width;
-
-  if (image.width > image.height) {
-    setLayerSize({
-      width: DEFAULT_LAYER_SIZE.WIDTH,
-      height: DEFAULT_LAYER_SIZE.HEIGHT * ratio,
-    });
-    canvasCtx.drawImage(
-      image,
-      0,
-      0,
-      DEFAULT_LAYER_SIZE.WIDTH,
-      DEFAULT_LAYER_SIZE.HEIGHT * ratio
-    );
-    return;
-  }
-
-  if (image.width <= image.height) {
-    setLayerSize({
-      width: DEFAULT_LAYER_SIZE.WIDTH / ratio,
-      height: DEFAULT_LAYER_SIZE.HEIGHT,
-    });
-    canvasCtx.drawImage(
-      image,
-      0,
-      0,
-      DEFAULT_LAYER_SIZE.WIDTH / ratio,
-      DEFAULT_LAYER_SIZE.HEIGHT
-    );
-    return;
-  }
-
-  canvasCtx.drawImage(
-    image,
-    0,
-    0,
-    DEFAULT_LAYER_SIZE.WIDTH,
-    DEFAULT_LAYER_SIZE.HEIGHT
-  );
-};
-
-const drawCropAreaBox = (
-  ctx: CanvasRenderingContext2D,
-  cropArea: CropArea
-): void => {
-  console.log(cropArea);
-  const cropHandlerBoxWidth = 10;
-
-  ctx.setLineDash([4, 2]);
-  ctx.strokeRect(cropArea.x, cropArea.y, cropArea.width, cropArea.height);
-  ctx.clearRect(cropArea.x, cropArea.y, cropArea.width, cropArea.height);
-
-  ctx.setLineDash([]);
-  ctx.fillStyle = "rgb(255, 255, 255)";
-  ctx.strokeRect(
-    cropArea.x - cropHandlerBoxWidth / 2,
-    cropArea.y - cropHandlerBoxWidth / 2,
-    cropHandlerBoxWidth,
-    cropHandlerBoxWidth
-  );
-  ctx.fillRect(
-    cropArea.x - cropHandlerBoxWidth / 2,
-    cropArea.y - cropHandlerBoxWidth / 2,
-    cropHandlerBoxWidth,
-    cropHandlerBoxWidth
-  );
-
-  ctx.strokeRect(
-    cropArea.x + cropArea.width - cropHandlerBoxWidth / 2,
-    cropArea.y - cropHandlerBoxWidth / 2,
-    cropHandlerBoxWidth,
-    cropHandlerBoxWidth
-  );
-  ctx.fillRect(
-    cropArea.x + cropArea.width - cropHandlerBoxWidth / 2,
-    cropArea.y - cropHandlerBoxWidth / 2,
-    cropHandlerBoxWidth,
-    cropHandlerBoxWidth
-  );
-
-  ctx.strokeRect(
-    cropArea.x - cropHandlerBoxWidth / 2,
-    cropArea.y + cropArea.height - cropHandlerBoxWidth / 2,
-    cropHandlerBoxWidth,
-    cropHandlerBoxWidth
-  );
-  ctx.fillRect(
-    cropArea.x - cropHandlerBoxWidth / 2,
-    cropArea.y + cropArea.height - cropHandlerBoxWidth / 2,
-    cropHandlerBoxWidth,
-    cropHandlerBoxWidth
-  );
-
-  ctx.strokeRect(
-    cropArea.x + cropArea.width - cropHandlerBoxWidth / 2,
-    cropArea.y + cropArea.height - cropHandlerBoxWidth / 2,
-    cropHandlerBoxWidth,
-    cropHandlerBoxWidth
-  );
-  ctx.fillRect(
-    cropArea.x + cropArea.width - cropHandlerBoxWidth / 2,
-    cropArea.y + cropArea.height - cropHandlerBoxWidth / 2,
-    cropHandlerBoxWidth,
-    cropHandlerBoxWidth
-  );
-};
