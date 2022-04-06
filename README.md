@@ -10,8 +10,6 @@ distribution : 2022-04-05 ~
 
 ## Function
 
-- draggable croparea
-
-- handleable croparea
+- draggable & size handleable croparea
 
 - save cropped image
