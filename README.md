@@ -2,7 +2,7 @@
 
 this is Simple image cropper (use HTML5 canvas)
 
-site : https://image-cropper.pages.dev/
+URL : https://image-cropper.pages.dev/
 
 develop : 2022-04-05 ~
 
