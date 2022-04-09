@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import "./style.css";
-import { ImageType } from "../../App";
+import { DISABLED_CROP_AREA, ImageType, INITIAL_CROP_AREA } from "../../App";
 import { CropAreaParams, Layer, Mode, MouseHold, MousePosition } from "./types";
 import { drawResizedImageLayer } from "./drawResizedImageLayer";
 import { drawCropAreaBox } from "./drawCropAreaBox";
@@ -11,33 +11,22 @@ export enum DEFAULT_LAYER_SIZE {
   HEIGHT = 500,
 }
 
-const DISABLED_CROP_AREA: CropAreaParams = {
-  x: -100,
-  y: -100,
-  width: 0,
-  height: 0,
-  innerClickX: 0,
-  innerClickY: 0,
-};
-
-const INITIAL_CROP_AREA: CropAreaParams = {
-  x: 50,
-  y: 50,
-  width: 100,
-  height: 100,
-  innerClickX: 0,
-  innerClickY: 0,
-};
 interface CropAreaProps {
   image?: ImageType;
+  cropArea: CropAreaParams;
+  setCropArea: React.Dispatch<React.SetStateAction<CropAreaParams>>;
 }
 
-export default function CropArea({ image }: CropAreaProps) {
+export default function CropArea({
+  image,
+  cropArea,
+  setCropArea,
+}: CropAreaProps) {
   const [layerSize, setLayerSize] = useState<Layer>({
     width: DEFAULT_LAYER_SIZE.WIDTH,
     height: DEFAULT_LAYER_SIZE.HEIGHT,
   });
-  const [cropArea, setCropArea] = useState<CropAreaParams>(DISABLED_CROP_AREA);
+  // const [cropArea, setCropArea] = useState<CropAreaParams>(DISABLED_CROP_AREA);
   const [mode, setMode] = useState<Mode>("NONE");
   const [isMouseHold, setIsMouseHold] = useState<MouseHold>(false);
   const [mousePosition, setMousePosition] = useState<MousePosition>(false);
@@ -71,7 +60,6 @@ export default function CropArea({ image }: CropAreaProps) {
     };
 
     setMode("CROP");
-    console.log("이미지그리기끝");
   };
 
   const drawCropAreaLayer = () => {
@@ -83,7 +71,6 @@ export default function CropArea({ image }: CropAreaProps) {
       const canvas = cropAreaLayer.current;
       const canvasCtx = canvas?.getContext("2d");
       if (canvas) {
-        console.log(canvas.width);
         canvasCtx?.clearRect(0, 0, canvas.width, canvas.height);
       }
 
@@ -221,6 +208,7 @@ export default function CropArea({ image }: CropAreaProps) {
   };
 
   useEffect(drawRawImageLayer, [image]);
+  //requestAnimationFrame 적용필요
   useEffect(drawCropAreaLayer, [layerSize, cropArea, mode]);
   useEffect(handleCursorStyle, [mousePosition]);
 
