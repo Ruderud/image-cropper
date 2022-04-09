@@ -13,8 +13,19 @@ export const drawCropAreaBox = (
   ctx.strokeRect(cropArea.x, cropArea.y, cropArea.width, cropArea.height);
   ctx.clearRect(cropArea.x, cropArea.y, cropArea.width, cropArea.height);
 
+  //(임시)INNER AREA 구간 표기
+  ctx.setLineDash([]);
+  ctx.strokeStyle = "rgb(255, 0, 0)";
+  ctx.strokeRect(
+    cropArea.x + 20,
+    cropArea.y + 20,
+    cropArea.width - 40,
+    cropArea.height - 40
+  );
+
   //구석부분 핸들링 박스
   ctx.setLineDash([]);
+  ctx.strokeStyle = "rgb(0, 0, 0)";
   ctx.fillStyle = "rgb(255, 255, 255)";
   //좌상
   ctx.strokeRect(
