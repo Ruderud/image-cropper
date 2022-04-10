@@ -15,12 +15,16 @@ interface CropAreaProps {
   image?: ImageType;
   cropArea: CropAreaParams;
   setCropArea: React.Dispatch<React.SetStateAction<CropAreaParams>>;
+  setMaginificationRate: React.Dispatch<
+    React.SetStateAction<number | undefined>
+  >;
 }
 
 export default function CropArea({
   image,
   cropArea,
   setCropArea,
+  setMaginificationRate,
 }: CropAreaProps) {
   const [layerSize, setLayerSize] = useState<Layer>({
     width: DEFAULT_LAYER_SIZE.WIDTH,
@@ -57,6 +61,12 @@ export default function CropArea({
         canvasCtx,
         setLayerSize,
       });
+      // console.log(layerSize.width, img.width);
+      setMaginificationRate(
+        layerSize.width < layerSize.height
+          ? layerSize.width / img.width
+          : layerSize.height / img.height
+      );
     };
 
     setMode("CROP");
@@ -210,14 +220,6 @@ export default function CropArea({
       default:
         cropAreaLayerEle.setAttribute("style", "cursor:default");
         break;
-    }
-  };
-
-  const RAF = () => {
-    const rander = window.requestAnimationFrame(drawCropAreaLayer);
-
-    if (mode === "NONE") {
-      cancelAnimationFrame(rander);
     }
   };
 
