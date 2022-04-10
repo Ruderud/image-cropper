@@ -21,9 +21,9 @@ export const checkMouseCoordinate = (
   mouseCoordinate: MouseCoordinate
 ): MouseHold => {
   if (
-    mouseCoordinate.x > cropArea.x + 20 &&
-    mouseCoordinate.x < cropArea.x + 20 &&
-    mouseCoordinate.y > cropArea.y + cropArea.height - 40 &&
+    mouseCoordinate.x > cropArea.x - 20 &&
+    mouseCoordinate.x < cropArea.x + cropArea.width - 40 &&
+    mouseCoordinate.y > cropArea.y - 20 &&
     mouseCoordinate.y < cropArea.y + cropArea.height - 40
   )
     return "INNER_HOLD";

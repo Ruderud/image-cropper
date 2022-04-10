@@ -65,6 +65,7 @@ export default function CropArea({
   const drawCropAreaLayer = () => {
     if (mode === "CROP") {
       if (cropArea === DISABLED_CROP_AREA) {
+        console.log("그림");
         setCropArea(INITIAL_CROP_AREA);
       }
 
@@ -150,6 +151,7 @@ export default function CropArea({
       mousePosition !== "INNER"
     ) {
       console.log("크기조절움직임");
+      //현재 우하단 시작기준으로만 작성되어있음
       setCropArea({
         ...cropArea,
         width: evt.clientX - canvasPosition.x - cropArea.x,
@@ -168,48 +170,61 @@ export default function CropArea({
   };
 
   const handleCursorStyle = () => {
-    const bodyTag = document.body;
+    const cropAreaLayerEle = document.querySelector(".cropArea__cropAreaLayer");
+
+    if (!cropAreaLayerEle) return;
+
+    cropAreaLayerEle.setAttribute("style", "cursor:default");
 
     switch (mousePosition) {
       case !mousePosition:
-        bodyTag.style.cursor = "default";
+        cropAreaLayerEle.setAttribute("style", "cursor:default");
         break;
       case "NW_OUTER":
-        bodyTag.style.cursor = "nwse-resize";
+        cropAreaLayerEle.setAttribute("style", "cursor:nwse-resize");
         break;
       case "N_OUTER":
-        bodyTag.style.cursor = "ns-resize";
+        cropAreaLayerEle.setAttribute("style", "cursor:ns-resize");
         break;
       case "NE_OUTER":
-        bodyTag.style.cursor = "nesw-resize";
+        cropAreaLayerEle.setAttribute("style", "cursor:nesw-resize");
         break;
       case "W_OUTER":
-        bodyTag.style.cursor = "ew-resize";
+        cropAreaLayerEle.setAttribute("style", "cursor:ew-resize");
         break;
       case "INNER":
-        bodyTag.style.cursor = "move";
+        cropAreaLayerEle.setAttribute("style", "cursor:move");
         break;
       case "E_OUTER":
-        bodyTag.style.cursor = "ew-resize";
+        cropAreaLayerEle.setAttribute("style", "cursor:ew-resize");
         break;
       case "SW_OUTER":
-        bodyTag.style.cursor = "nesw-resize";
+        cropAreaLayerEle.setAttribute("style", "cursor:nesw-resize");
         break;
       case "S_OUTER":
-        bodyTag.style.cursor = "ns-resize";
+        cropAreaLayerEle.setAttribute("style", "cursor:ns-resize");
         break;
       case "SE_OUTER":
-        bodyTag.style.cursor = "nwse-resize";
+        cropAreaLayerEle.setAttribute("style", "cursor:nwse-resize");
         break;
       default:
-        bodyTag.style.cursor = "default";
+        cropAreaLayerEle.setAttribute("style", "cursor:default");
         break;
+    }
+  };
+
+  const RAF = () => {
+    const rander = window.requestAnimationFrame(drawCropAreaLayer);
+
+    if (mode === "NONE") {
+      cancelAnimationFrame(rander);
     }
   };
 
   useEffect(drawRawImageLayer, [image]);
   //requestAnimationFrame 적용필요
   useEffect(drawCropAreaLayer, [layerSize, cropArea, mode]);
+  // useEffect(RAF, [layerSize, cropArea, mode]);
   useEffect(handleCursorStyle, [mousePosition]);
 
   return (
