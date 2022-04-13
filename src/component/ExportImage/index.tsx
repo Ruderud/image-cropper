@@ -25,9 +25,10 @@ export default function ExportImage({
     if (!image) return console.log("저장할 이미지 원본없음");
 
     const cropCanvas = croppedImageLayer.current;
+    const saveImageURL = cropCanvas?.toDataURL();
 
-    // if (!saveImageURL) return;
-    // imageDownload(saveImageURL)
+    if (!saveImageURL) return;
+    imageDownload(saveImageURL);
   };
 
   useEffect(() => {
@@ -58,8 +59,6 @@ export default function ExportImage({
       img.width * maginificationRate,
       img.height * maginificationRate
     );
-
-    console.log(maginificationRate);
 
     setLayerSize({
       width: cropArea.width,
