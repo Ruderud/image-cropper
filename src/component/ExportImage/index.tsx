@@ -38,39 +38,38 @@ export default function ExportImage({
     const cropCanvasCtx = cropCanvas?.getContext("2d");
 
     if (cropCanvas) {
-      cropCanvasCtx?.clearRect(0, 0, cropArea.width, cropArea.height);
+      cropCanvasCtx?.clearRect(
+        0,
+        0,
+        cropArea.width / maginificationRate,
+        cropArea.height / maginificationRate
+      );
     }
 
     const img = new Image();
     img.src = image.url;
 
-    cropCanvasCtx?.rect(
-      0,
-      0,
-      img.width * maginificationRate,
-      img.height * maginificationRate
-    );
+    cropCanvasCtx?.rect(0, 0, img.width, img.height);
     cropCanvasCtx?.clip();
 
     cropCanvasCtx?.drawImage(
       img,
-      -cropArea.x,
-      -cropArea.y,
-      // img.width,
-      // img.height,
-      img.width * maginificationRate,
-      img.height * maginificationRate
+      -(cropArea.x / maginificationRate),
+      -(cropArea.y / maginificationRate),
+      img.width,
+      img.height
     );
 
     setLayerSize({
-      width: cropArea.width,
-      height: cropArea.height,
+      width: cropArea.width / maginificationRate,
+      height: cropArea.height / maginificationRate,
     });
   }, [cropArea]);
 
   return (
     <>
       <canvas
+        style={{ display: "none" }}
         ref={croppedImageLayer}
         width={layerSize.width}
         height={layerSize.height}

@@ -10,7 +10,7 @@ interface DrawResizedImageParams {
 
 export const drawResizedImageLayer = ({
   image,
-  imageSizeRatio,
+  // imageSizeRatio,
   canvasCtx,
   setLayerSize,
 }: DrawResizedImageParams): void => {
@@ -23,33 +23,33 @@ export const drawResizedImageLayer = ({
     return;
   }
 
-  // const ratio = image.height / image.width;
+  const ratio = image.height / image.width;
 
   if (image.width > image.height) {
     setLayerSize({
       width: DEFAULT_LAYER_SIZE.WIDTH,
-      height: DEFAULT_LAYER_SIZE.HEIGHT * imageSizeRatio,
+      height: DEFAULT_LAYER_SIZE.HEIGHT * ratio,
     });
     canvasCtx.drawImage(
       image,
       0,
       0,
       DEFAULT_LAYER_SIZE.WIDTH,
-      DEFAULT_LAYER_SIZE.HEIGHT / imageSizeRatio
+      DEFAULT_LAYER_SIZE.HEIGHT * ratio
     );
     return;
   }
 
   if (image.width <= image.height) {
     setLayerSize({
-      width: DEFAULT_LAYER_SIZE.WIDTH / imageSizeRatio,
+      width: DEFAULT_LAYER_SIZE.WIDTH / ratio,
       height: DEFAULT_LAYER_SIZE.HEIGHT,
     });
     canvasCtx.drawImage(
       image,
       0,
       0,
-      DEFAULT_LAYER_SIZE.WIDTH / imageSizeRatio,
+      DEFAULT_LAYER_SIZE.WIDTH / ratio,
       DEFAULT_LAYER_SIZE.HEIGHT
     );
     return;

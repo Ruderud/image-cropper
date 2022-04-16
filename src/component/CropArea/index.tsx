@@ -65,11 +65,7 @@ export default function CropArea({
         setLayerSize,
       });
       // console.log(layerSize.width, img.width);
-      setMaginificationRate(
-        layerSize.width < layerSize.height
-          ? layerSize.width / img.width
-          : layerSize.height / img.height
-      );
+      setMaginificationRate(layerSize.width / img.width);
     };
 
     setMode("CROP");
