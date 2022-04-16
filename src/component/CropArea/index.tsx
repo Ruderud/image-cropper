@@ -64,7 +64,6 @@ export default function CropArea({
         canvasCtx,
         setLayerSize,
       });
-      // console.log(layerSize.width, img.width);
       setMaginificationRate(layerSize.width / img.width);
     };
 
@@ -74,7 +73,6 @@ export default function CropArea({
   const drawCropAreaLayer = () => {
     if (mode === "CROP") {
       if (cropArea === DISABLED_CROP_AREA) {
-        console.log("그림");
         setCropArea(INITIAL_CROP_AREA);
       }
 
@@ -112,7 +110,6 @@ export default function CropArea({
 
     switch (HOLD_POSITION) {
       case "INNER_HOLD":
-        console.log("이동");
         setIsMouseHold("INNER_HOLD");
         setCropArea({
           ...cropArea,
@@ -159,7 +156,6 @@ export default function CropArea({
       mousePosition &&
       mousePosition !== "INNER"
     ) {
-      console.log("크기조절움직임");
       //현재 우하단 시작기준으로만 작성되어있음
       setCropArea({
         ...cropArea,
