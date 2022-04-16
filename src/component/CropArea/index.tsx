@@ -14,6 +14,7 @@ export enum DEFAULT_LAYER_SIZE {
 interface CropAreaProps {
   image?: ImageType;
   cropArea: CropAreaParams;
+  imageSizeRatio: number;
   setCropArea: React.Dispatch<React.SetStateAction<CropAreaParams>>;
   setMaginificationRate: React.Dispatch<
     React.SetStateAction<number | undefined>
@@ -23,6 +24,7 @@ interface CropAreaProps {
 export default function CropArea({
   image,
   cropArea,
+  imageSizeRatio,
   setCropArea,
   setMaginificationRate,
 }: CropAreaProps) {
@@ -58,6 +60,7 @@ export default function CropArea({
     img.onload = () => {
       drawResizedImageLayer({
         image: img,
+        imageSizeRatio,
         canvasCtx,
         setLayerSize,
       });

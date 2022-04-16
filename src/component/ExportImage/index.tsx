@@ -56,6 +56,8 @@ export default function ExportImage({
       img,
       -cropArea.x,
       -cropArea.y,
+      // img.width,
+      // img.height,
       img.width * maginificationRate,
       img.height * maginificationRate
     );

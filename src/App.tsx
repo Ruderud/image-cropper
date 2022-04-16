@@ -32,6 +32,7 @@ export const INITIAL_CROP_AREA: CropAreaParams = {
 
 export default function App() {
   const [image, setImage] = useState<ImageType | undefined>();
+  const [imageSizeRatio, setImageSizeRatio] = useState<number>(1);
   const [cropArea, setCropArea] = useState<CropAreaParams>(DISABLED_CROP_AREA);
   const [maginificationRate, setMaginificationRate] =
     useState<number | undefined>();
@@ -43,6 +44,7 @@ export default function App() {
         <CropArea
           image={image}
           cropArea={cropArea}
+          imageSizeRatio={imageSizeRatio}
           setCropArea={setCropArea}
           setMaginificationRate={setMaginificationRate}
         />
@@ -51,6 +53,8 @@ export default function App() {
         <Options
           cropArea={cropArea}
           setCropArea={setCropArea}
+          imageSizeRatio={imageSizeRatio}
+          setImageSizeRatio={setImageSizeRatio}
           setImage={setImage}
         />
       </div>
